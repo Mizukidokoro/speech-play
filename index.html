@@ -1,0 +1,421 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>占い</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Anton&family=Dela+Gothic+One&family=DotGothic16&family=Kaisei+Decol:wght@500&family=Kiwi+Maru&family=Rampart+One&family=RocknRoll+One&display=swap");
+    </style>
+    <link
+      rel="stylesheet"
+      href="style.css"
+      media="screen and (max-width:1000px)"
+    />
+    <link
+      rel="stylesheet"
+      href="style2.css"
+      media="screen and (min-width:1000px)"
+    />
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>12星座占い</h1>
+      <div class="content">
+        <div class="mark">
+          <p id="seiza_name">星座</p>
+          <p id="seiza">？</p>
+        </div>
+        <p class="center-box">
+          <img id="mic" src="micoff.svg" width="300px" />
+        </p>
+        <div class="over">
+          <ul>
+            <li>誕生日から星座を教えてくれます</li>
+            <li>自分の星座を言うと運勢を教えてくれます</li>
+          </ul>
+        </div>
+      </div>
+      <div id="result-div" class="large-text">～？？？～</div>
+      <div id="kekka" class="large-text">今日の運勢を聞いてみよう！</div>
+    </div>
+    <script>
+      const resultDiv = document.querySelector("#result-div");
+      const micDiv = document.querySelector("#mic");
+      let speakingtime = 0;
+
+      const seiza = document.querySelector("#seiza");
+      const seiza_name = document.querySelector("#seiza_name");
+      const kekka = document.querySelector("#kekka");
+
+      // 音声認識機能(Chrome)
+      let rec = new webkitSpeechRecognition();
+      let stopped = true;
+      rec.continuous = true;
+      rec.interimResults = false;
+      rec.lang = "ja-JP";
+
+      micDiv.onclick = function () {
+        if (stopped == true) {
+          stopped = false;
+          resultDiv.innerHTML = "";
+          rec.start();
+        } else {
+          stopped = true;
+          rec.stop();
+        }
+      };
+
+      rec.onstart = function () {
+        console.log("on start");
+        micDiv.setAttribute("src", "micon.svg");
+        speakingtime = 0;
+      };
+
+      rec.onend = function () {
+        console.log("on end");
+        micDiv.setAttribute("src", "micoff.svg");
+        if (stopped == false) {
+          setTimeout(function () {
+            rec.start();
+          }, speakingtime);
+        }
+      };
+
+      rec.onresult = function (e) {
+        rec.stop();
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          if (e.results[i].isFinal) {
+            console.log(e);
+            let text = e.results[i][0].transcript;
+            resultDiv.innerHTML = "～" + text + "～";
+            text = dialogue(text);
+            console.log(text);
+            speakingtime = text.length * 200;
+            console.log("estimate:", speakingtime, "ms");
+            speak(text);
+          }
+        }
+      };
+
+      //運勢
+      let sign = [
+        "おひつじ座",
+        "おうし座",
+        "ふたご座",
+        "かに座",
+        "しし座",
+        "おとめ座",
+        "てんびん座",
+        "さそり座",
+        "いて座",
+        "やぎ座",
+        "みずがめ座",
+        "うお座"
+      ];
+      let rank = [
+        "おめでとうございます！第1い",
+        "第2",
+        "第3",
+        "第4",
+        "第5",
+        "第6",
+        "第7",
+        "第8",
+        "第9",
+        "第10",
+        "第11",
+        "ごめんなさい。第12"
+      ];
+      for (let i = 0; i < rank.length; i++) {
+        let rnd = Math.floor(Math.random() * rank.length);
+        let w = rank[rnd];
+        rank[rnd] = rank[i];
+        rank[i] = w;
+      }
+      let item = [
+        "トートバッグ",
+        "イヤリング・ピアス",
+        "ハンドクリーム",
+        "腕時計",
+        "コーヒー",
+        "入浴剤",
+        "お花",
+        "食器",
+        "アロマ",
+        "黄色いタオル",
+        "めがね",
+        "ぼうし"
+      ];
+      for (let i = 0; i < item.length; i++) {
+        let rnd = Math.floor(Math.random() * item.length);
+        let w = item[rnd];
+        item[rnd] = item[i];
+        item[i] = w;
+      }
+
+      function dialogue(input) {
+        if (/星座.*教えて/.test(input)) {
+          kekka.innerHTML = "→誕生日を教えて下さい";
+          return "誕生日を教えて下さい";
+        } else if (
+          /3月21日|3月22日|3月23日|3月24日|3月25日|3月26日|3月27日|3月28日|3月29日|3月30日|3月31日|4月1日|4月2日|4月3日|4月4日|4月5日|4月6日|4月7日|4月8日|4月9日|4月10日|4月11日|4月12日|4月13日|4月14日|4月15日|4月16日|4月17日|4月18日|4月19日/.test(
+            input
+          )
+        ) {
+          kekka.innerHTML = "→おひつじ座です";
+          return "牡羊座です";
+        } else if (
+          /4月20日|4月21日|4月22日|4月23日|4月24日|4月25日|4月26日|4月27日|4月28日|4月29日|4月30日|5月1日|5月2日|5月3日|5月4日|5月5日|5月6日|5月7日|5月8日|5月9日|5月10日|5月11日|5月12日|5月13日|5月14日|5月15日|5月16日|5月17日|5月18日|5月19日|5月20日/.test(
+            input
+          )
+        ) {
+          kekka.innerHTML = "→おうし座です";
+          return "牡牛座です";
+        } else if (
+          /5月21日|5月22日|5月23日|5月24日|5月25日|5月26日|5月27日|5月28日|5月29日|5月30日|5月31日|6月1日|6月2日|6月3日|6月4日|6月5日|6月6日|6月7日|6月8日|6月9日|6月10日|6月11日|6月12日|6月13日|6月14日|6月15日|6月16日|6月17日|6月18日|6月19日|6月20日|6月21日/.test(
+            input
+          )
+        ) {
+          kekka.innerHTML = "→ふたご座です";
+          return "双子座です";
+        } else if (
+          /6月22日|6月23日|6月24日|6月25日|6月26日|6月27日|6月28日|6月29日|6月30日|7月1日|7月2日|7月3日|7月4日|7月5日|7月6日|7月7日|7月8日|7月9日|7月10日|7月11日|7月12日|7月13日|7月14日|7月15日|7月16日|7月17日|7月18日|7月19日|7月20日|7月21日|7月22日/.test(
+            input
+          )
+        ) {
+          kekka.innerHTML = "→かに座です";
+          return "蟹座です";
+        } else if (
+          /7月23日|7月24日|7月25日|7月26日|7月27日|7月28日|7月29日|7月30日|7月31日|8月1日|8月2日|8月3日|8月4日|8月5日|8月6日|8月7日|8月8日|8月9日|8月10日|8月11日|8月12日|8月13日|8月14日|8月15日|8月16日|8月17日|8月18日|8月19日|8月20日|8月21日|8月22日/.test(
+            input
+          )
+        ) {
+          kekka.innerHTML = "→しし座です";
+          return "獅子座です";
+        } else if (
+          /8月23日|8月24日|8月25日|8月26日|8月27日|8月28日|8月29日|8月30日|8月31日|9月1日|9月2日|9月3日|9月4日|9月5日|9月6日|9月7日|9月8日|9月9日|9月10日|9月11日|9月12日|9月13日|9月14日|9月15日|9月16日|9月17日|9月18日|9月19日|9月20日|9月21日|9月22日/.test(
+            input
+          )
+        ) {
+          kekka.innerHTML = "→おとめ座です";
+          return "乙女座です";
+        } else if (
+          /9月23日|9月24日|9月25日|9月26日|9月27日|9月28日|9月29日|9月30日|9月31日|10月1日|10月2日|10月3日|10月4日|10月5日|10月6日|10月7日|10月8日|10月9日|10月10日|10月11日|10月12日|10月13日|10月14日|10月15日|10月16日|10月17日|10月18日|10月19日|10月20日|10月21日|10月22日|10月23日/.test(
+            input
+          )
+        ) {
+          kekka.innerHTML = "→てんびん座です";
+          return "天秤座です";
+        } else if (
+          /10月24日|10月25日|10月26日|10月27日|10月28日|10月29日|10月30日|10月31日|11月1日|11月2日|11月3日|11月4日|11月5日|11月6日|11月7日|11月8日|11月9日|11月10日|11月11日|11月12日|11月13日|11月14日|11月15日|11月16日|11月17日|11月18日|11月19日|11月20日|11月21日|11月22日/.test(
+            input
+          )
+        ) {
+          kekka.innerHTML = "→さそり座です";
+          return "蠍座です";
+        } else if (
+          /11月23日|11月24日|11月25日|11月26日|11月27日|11月28日|11月29日|11月30日|12月1日|12月2日|12月3日|12月4日|12月5日|12月6日|12月7日|12月8日|12月9日|12月10日|12月11日|12月12日|12月13日|12月14日|12月15日|12月16日|12月17日|12月18日|12月19日|12月20日|12月21日/.test(
+            input
+          )
+        ) {
+          kekka.innerHTML = "→いて座です";
+          return "射手座です";
+        } else if (
+          /12月22日|12月23日|12月24日|12月25日|12月26日|12月27日|12月28日|12月29日|12月30日|12月31日|1月1日|1月2日|1月3日|1月4日|1月5日|1月6日|1月7日|1月8日|1月9日|1月10日|1月11日|1月12日|1月13日|1月14日|1月15日|1月16日|1月17日|1月18日|1月19日/.test(
+            input
+          )
+        ) {
+          kekka.innerHTML = "→やぎ座です";
+          return "山羊座です";
+        } else if (
+          /1月20日|1月21日|1月22日|1月23日|1月24日|1月25日|1月26日|1月27日|1月28日|1月29日|1月30日|1月31日|2月1日|2月2日|2月3日|2月4日|2月5日|2月6日|2月7日|2月8日|2月9日|2月10日|2月11日|2月12日|2月13日|2月14日|2月15日|2月16日|2月17日|2月18日/.test(
+            input
+          )
+        ) {
+          kekka.innerHTML = "→みずがめ座です";
+          return "水瓶座です";
+        } else if (
+          /2月19日|2月20日|2月21日|2月22日|2月23日|2月24日|2月25日|2月26日|2月27日|2月28日|2月29日|3月1日|3月2日|3月3日|3月4日|3月5日|3月6日|3月7日|3月8日|3月9日|3月10日|3月11日|3月12日|3月13日|3月14日|3月15日|3月16日|3月17日|3月18日|3月19日|3月20日/.test(
+            input
+          )
+        ) {
+          kekka.innerHTML = "→うお座です";
+          return "魚座です";
+        } else if (/今日の運勢/.test(input)) {
+          kekka.innerHTML = "→星座を教えて下さい";
+          return "星座を教えてください";
+        } else if (/牡羊座|おひつじ座/.test(input)) {
+          seiza_name.innerHTML = "おひつじ座";
+          seiza.innerHTML = "♈";
+          kekka.innerHTML = rank[0];
+          return (
+            "牡羊座の運勢は、" +
+            rank[0] +
+            "いです。" +
+            "ラッキーアイテムは" +
+            item[0] +
+            "です。活用しましょう。"
+          );
+        } else if (/牡牛座|おうし座/.test(input)) {
+          seiza_name.innerHTML = "おうし座";
+          seiza.innerHTML = "♉";
+          kekka.innerHTML = rank[1] + "位";
+          return (
+            "牡牛座の運勢は、" +
+            rank[1] +
+            "いです。" +
+            "ラッキーアイテムは" +
+            item[1] +
+            "です。活用しましょう。"
+          );
+        } else if (/双子座|ふたご座/.test(input)) {
+          seiza_name.innerHTML = "ふたご座";
+          seiza.innerHTML = "♊";
+          kekka.innerHTML = rank[2] + "位";
+          return (
+            "双子座の運勢は、" +
+            rank[2] +
+            "いです。" +
+            "ラッキーアイテムは" +
+            item[2] +
+            "です。活用しましょう。"
+          );
+        } else if (/蟹座|かに座/.test(input)) {
+          seiza_name.innerHTML = "かに座";
+          seiza.innerHTML = "♋";
+          kekka.innerHTML = rank[3] + "位";
+          return (
+            "蟹座の運勢は、" +
+            rank[3] +
+            "いです。" +
+            "ラッキーアイテムは" +
+            item[3] +
+            "です。活用しましょう。"
+          );
+        } else if (/獅子座|しし座/.test(input)) {
+          seiza_name.innerHTML = "しし座";
+          seiza.innerHTML = "♌";
+          kekka.innerHTML = rank[4] + "位";
+          return (
+            "獅子座の運勢は、" +
+            rank[4] +
+            "いです。" +
+            "ラッキーアイテムは" +
+            item[4] +
+            "です。活用しましょう。"
+          );
+        } else if (/乙女座|おとめ座/.test(input)) {
+          seiza_name.innerHTML = "おとめ座";
+          seiza.innerHTML = "♍";
+          kekka.innerHTML = rank[5] + "位";
+          return (
+            "乙女座の運勢は、" +
+            rank[5] +
+            "いです。" +
+            "ラッキーアイテムは" +
+            item[5] +
+            "です。活用しましょう。"
+          );
+        } else if (/天秤座|てんびん座/.test(input)) {
+          seiza_name.innerHTML = "てんびん座";
+          seiza.innerHTML = "♎";
+          kekka.innerHTML = rank[6] + "位";
+          return (
+            "天秤座の運勢は、" +
+            rank[6] +
+            "いです。" +
+            "ラッキーアイテムは" +
+            item[6] +
+            "です。活用しましょう。"
+          );
+        } else if (/蠍座|さそり座/.test(input)) {
+          seiza_name.innerHTML = "さそり座";
+          seiza.innerHTML = "♏";
+          kekka.innerHTML = rank[7] + "位";
+          return (
+            "蠍座の運勢は、" +
+            rank[7] +
+            "いです。" +
+            "ラッキーアイテムは" +
+            item[7] +
+            "です。活用しましょう。"
+          );
+        } else if (/射手座|いて座/.test(input)) {
+          seiza_name.innerHTML = "いて座";
+          seiza.innerHTML = "♐";
+          kekka.innerHTML = rank[8] + "位";
+          return (
+            "射手座の運勢は、" +
+            rank[8] +
+            "いです。" +
+            "ラッキーアイテムは" +
+            item[8] +
+            "です。活用しましょう。"
+          );
+        } else if (/山羊座|やぎ座/.test(input)) {
+          seiza_name.innerHTML = "やぎ座";
+          seiza.innerHTML = "♑";
+          kekka.innerHTML = rank[9] + "位";
+          return (
+            "山羊座の運勢は、" +
+            rank[9] +
+            "いです。" +
+            "ラッキーアイテムは" +
+            item[9] +
+            "です。活用しましょう。"
+          );
+        } else if (/水瓶座|みずがめ座/.test(input)) {
+          seiza_name.innerHTML = "みずがめ座";
+          seiza.innerHTML = "♒";
+          kekka.innerHTML = rank[10] + "位";
+          return (
+            "水瓶座の運勢は、" +
+            rank[10] +
+            "いです。" +
+            "ラッキーアイテムは" +
+            item[10] +
+            "です。活用しましょう。"
+          );
+        } else if (/魚座|うお座/.test(input)) {
+          seiza_name.innerHTML = "うお座";
+          seiza.innerHTML = "♓";
+          kekka.innerHTML = rank[11] + "位";
+          return (
+            "魚座の運勢は、" +
+            rank[11] +
+            "いです。" +
+            "ラッキーアイテムは" +
+            item[11] +
+            "です。活用しましょう。"
+          );
+        } else if (/ありがとう/.test(input)) {
+          kekka.innerHTML = "どういたしまして";
+          return "どういたしまして";
+        } else {
+          kekka.innerHTML = "すみません。よくわかりません。";
+          return "すみません。よくわかりません。";
+        }
+      }
+
+      // 発話機能をインスタンス化
+      let msg = new SpeechSynthesisUtterance();
+
+      function speak(text) {
+        msg.volume = 1.0; // 音量 min 0 ~ max 1
+        msg.rate = 1.0; // 速度 min 0 ~ max 10
+        msg.pitch = 1.0; // 音程 min 0 ~ max 2
+
+        msg.text = text; // 喋る内容
+        msg.lang = "ja-JP"; // en-US or ja-JP
+        //msg.lang = "en-US"; // en-US or ja-JP
+
+        // 発話実行
+        speechSynthesis.speak(msg);
+      }
+
+      // 終了時の処理
+      msg.onend = function (event) {
+        console.log("喋った時間：" + event.elapsedTime + "ms");
+      };
+    </script>
+  </body>
+</html>
